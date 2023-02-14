@@ -112,7 +112,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_ADC_Start_DMA(&hadc1, adcDMA, 10);
+  HAL_ADC_Start_DMA(&hadc1, adcDMA, 20);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -128,11 +128,11 @@ int main(void)
 	  		  timestamp = HAL_GetTick() + 1000; // +1Hz
 	  		  RawV = (adcDMA[0].in0+adcDMA[1].in0+adcDMA[2].in0+adcDMA[3].in0+adcDMA[4].in0+
 	  				adcDMA[5].in0+adcDMA[6].in0+adcDMA[1].in0+adcDMA[2].in0+adcDMA[3].in0+adcDMA[4].in0)/10;
-	  		  V = (((RawV/4095)*3.3)*1000)*2;
+	  		  V = (((RawV/4096)*3.3)*1000)*2;
 
 	  		  RawT = (adcDMA[0].temp+adcDMA[1].temp+adcDMA[2].temp+adcDMA[3].temp+adcDMA[4].temp+
 	  				adcDMA[5].temp+adcDMA[6].temp+adcDMA[7].temp+adcDMA[8].temp+adcDMA[9].temp)/10;
-	  		  tempC =((((RawT/4095)*3.3)-0.76)*0.0025)+2.5;
+	  		  tempC =((((RawT/4096)*3.3)-0.76)/0.0025)+25;
 	  		  tempK = tempC+273.15;
 
 	  	  }
