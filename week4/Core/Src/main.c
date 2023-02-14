@@ -1,3 +1,5 @@
+
+
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -46,13 +48,21 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint32_t adcRaw;
+//uint32_t adcDMA[10];
+float RawV;
+float RawT;
+float tempK;
+float tempC;
+float V;
+
+
 //declare buffer for DMA to Transmit.
 //uint16_t adcDMA[20];
 typedef struct{
 	uint16_t in0;
 	uint16_t temp;
 }adcDMAst;
-adcDMAst adcDMA[10];
+adcDMAst adcDMA[10];      //array that contain 2 struct
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,7 +112,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_ADC_Start_DMA(&hadc1, adcDMA, 10);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -112,7 +122,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_Delay(10000);
+	  static uint32_t timestamp = 0;
+	  if(HAL_GetTick() > timestamp)
+	  	  {
+	  		  timestamp = HAL_GetTick() + 1000; // +1Hz
+	  		  RawV = (adcDMA[0].in0+adcDMA[1].in0+adcDMA[2].in0+adcDMA[3].in0+adcDMA[4].in0+
+	  				adcDMA[5].in0+adcDMA[6].in0+adcDMA[1].in0+adcDMA[2].in0+adcDMA[3].in0+adcDMA[4].in0)/10;
+	  		  V = (((RawV/4095)*3.3)*1000)*2;
+
+	  		  RawT = (adcDMA[0].temp+adcDMA[1].temp+adcDMA[2].temp+adcDMA[3].temp+adcDMA[4].temp+
+	  				adcDMA[5].temp+adcDMA[6].temp+adcDMA[7].temp+adcDMA[8].temp+adcDMA[9].temp)/10;
+	  		  tempC =((((RawT/4095)*3.3)-0.76)*0.0025)+2.5;
+	  		  tempK = tempC+273.15;
+
+	  	  }
+
   }
   /* USER CODE END 3 */
 }
@@ -311,13 +335,13 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) //push natural interrupt button to
+/*void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) //push natural interrupt button to
 {
 	if(GPIO_Pin == GPIO_PIN_13)
 	{
 		HAL_ADC_Start_DMA(&hadc1, adcDMA, 20); // make adc start
 	}
-}
+}*/
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	adcRaw = HAL_ADC_GetValue(&hadc1);
